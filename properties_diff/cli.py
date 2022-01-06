@@ -22,13 +22,13 @@ def properties_to_dict(file: Path, separator="=", comment_char="#") -> Dict[str,
             pass
         elif separator not in line:
             # invalid line
-            se = SyntaxError(
+            error = SyntaxError(
                 f"Invalid file, no separator '{separator}' on line {lineno}"
             )
-            se.lineno = lineno
-            se.filename = str(file)
-            se.text = line
-            raise se
+            error.lineno = lineno
+            error.filename = str(file)
+            error.text = line
+            raise error
         else:
             index = line.index(separator)
             key = line[0:index].strip()
@@ -65,6 +65,30 @@ def run(args=None):
         help="select a format to show differences: using colors only (simple), using diff-like format (diff) or wdiff-like (wdiff) format. Default is 'diff'",
     )
     parser.add_argument(
+        "-A",
+        "--added",
+        action="append_const",
+        dest="sections",
+        const="added",
+        help="print added properties",
+    )
+    parser.add_argument(
+        "-D",
+        "--deleted",
+        action="append_const",
+        dest="sections",
+        const="deleted",
+        help="print deleted properties",
+    )
+    parser.add_argument(
+        "-M",
+        "--modified",
+        action="append_const",
+        dest="sections",
+        const="modified",
+        help="print modified properties",
+    )
+    parser.add_argument(
         "left",
         type=Path,
         metavar="left.properties",
@@ -95,39 +119,49 @@ def run(args=None):
         assert len(right) > 0, f"Cannot find any property in {args.right}"
 
         added = [key for key in sorted(right) if key not in left]
-        removed = [key for key in sorted(left) if key not in right]
-        updated = [
+        deleted = [key for key in sorted(left) if key not in right]
+        modified = [
             key for key in sorted(left) if key in right and left[key] != right[key]
         ]
-        if len(added) == 0 and len(removed) == 0 and len(updated) == 0:
+        if len(added) == 0 and len(deleted) == 0 and len(modified) == 0:
             print(f"Files {args.left} and {args.right} are similar")
         else:
             if not args.quiet:
-                print(f"{Fore.YELLOW}--- {args.left}{Fore.RESET}    {date(args.left)}")
-                print(
-                    f"{Fore.YELLOW}+++ {args.right}{Fore.RESET}    {date(args.right)}"
-                )
-
-            if len(removed):
-                print(f"{Fore.BLUE}# Only in {args.left}{Fore.RESET}")
                 if args.mode == "simple":
-                    for key in removed:
+                    print(
+                        f"{Fore.YELLOW}*** {args.left}{Fore.RESET} (left)    {date(args.left)}"
+                    )
+                    print(
+                        f"{Fore.YELLOW}*** {args.right}{Fore.RESET} (right)    {date(args.right)}"
+                    )
+                else:
+                    print(
+                        f"{Fore.YELLOW}--- {args.left}{Fore.RESET} (left)    {date(args.left)}"
+                    )
+                    print(
+                        f"{Fore.YELLOW}+++ {args.right}{Fore.RESET} (right)    {date(args.right)}"
+                    )
+
+            if len(deleted) and (args.sections is None or "deleted" in args.sections):
+                print(f"{Fore.BLUE}# Only in {args.left} (left){Fore.RESET}")
+                if args.mode == "simple":
+                    for key in deleted:
                         print(
                             f"{Fore.RED}{key}{args.sep}{quote(left, key)}{Fore.RESET}"
                         )
                 elif args.mode == "diff":
-                    for key in removed:
+                    for key in deleted:
                         print(
                             f"{Fore.RED}- {key}{args.sep}{quote(left, key)}{Fore.RESET}"
                         )
                 elif args.mode == "wdiff":
-                    for key in removed:
+                    for key in deleted:
                         print(
                             f"{Fore.RED}[-{key}{args.sep}{quote(left, key)}-]{Fore.RESET}"
                         )
 
-            if len(added):
-                print(f"{Fore.BLUE}# Only in {args.right}{Fore.RESET}")
+            if len(added) and (args.sections is None or "added" in args.sections):
+                print(f"{Fore.BLUE}# Only in {args.right} (right){Fore.RESET}")
                 if args.mode == "simple":
                     for key in added:
                         print(
@@ -144,21 +178,21 @@ def run(args=None):
                             f"{Fore.GREEN}{{+{key}{args.sep}{quote(right, key)}+}}{Fore.RESET}"
                         )
 
-            if len(updated):
+            if len(modified) and (args.sections is None or "modified" in args.sections):
                 print(
-                    f"{Fore.BLUE}# Updated from {args.left} to {args.right}{Fore.RESET}"
+                    f"{Fore.BLUE}# Updated from {args.left} (left) to {args.right} (right){Fore.RESET}"
                 )
                 if args.mode == "simple":
-                    for key in updated:
+                    for key in modified:
                         print(
                             f"{Fore.RED}{key}{args.sep}{quote(left, key)}{Fore.RESET}"
                         )
-                    for key in updated:
+                    for key in modified:
                         print(
                             f"{Fore.GREEN}{key}{args.sep}{quote(right, key)}{Fore.RESET}"
                         )
                 elif args.mode == "diff":
-                    for key in updated:
+                    for key in modified:
                         print(
                             f"{Fore.RED}- {key}{args.sep}{quote(left, key)}{Fore.RESET}"
                         )
@@ -166,12 +200,15 @@ def run(args=None):
                             f"{Fore.GREEN}+ {key}{args.sep}{quote(right, key)}{Fore.RESET}"
                         )
                 elif args.mode == "wdiff":
-                    for key in updated:
+                    for key in modified:
                         print(
                             f"{key}{args.sep}{Fore.RED}[-{quote(left, key)}-]{Fore.GREEN}{{+{quote(right, key)}+}}{Fore.RESET}"
                         )
     except BaseException as exc:
         print(f"{Fore.RED}ERROR: {exc}{Fore.RESET}", file=sys.stderr)
         if isinstance(exc, SyntaxError):
-            print(f"{Fore.YELLOW}{exc.filename}:{exc.lineno}{Fore.RESET}  {exc.text}")
+            print(
+                f"{Fore.YELLOW}{exc.filename}:{exc.lineno}{Fore.RESET}  {exc.text}",
+                file=sys.stderr,
+            )
         sys.exit(1)

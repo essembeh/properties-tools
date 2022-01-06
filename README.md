@@ -12,8 +12,8 @@ Even if *properties* files are text files, using directly `diff` is not that eff
 # Usage
 
 ```sh
-$ properties-diff --help
-usage: properties-diff [-h] [-q] [--quote] [--sep SEP] [-m {simple,diff,wdiff}] left.properties right.properties
+$ properties-diff tests/sample1.properties tests/sample2.properties -h
+usage: properties-diff [-h] [-q] [--quote] [--sep SEP] [-m {simple,diff,wdiff}] [-A] [-D] [-M] left.properties right.properties
 
 positional arguments:
   left.properties       left file to compare
@@ -25,14 +25,16 @@ optional arguments:
   --quote               use double quotes for values, example: foo="bar"
   --sep SEP             key/value separator, default is '='
   -m {simple,diff,wdiff}, --mode {simple,diff,wdiff}
-                        select a format to show differences: using colors only (simple), using diff-like format (diff) or wdiff-like
-                        (wdiff) format. Default is 'diff'
+                        select a format to show differences: using colors only (simple), using diff-like format (diff) or wdiff-like (wdiff) format. Default is 'diff'
+  -A, --added           print added properties
+  -D, --deleted         print deleted properties
+  -M, --modified        print modified properties
 ```
 
 ## Modes
 
 
-You can see differences between the properties files using 3 modes using `--mode <MODE>`
+You can see differences between the properties files using 3 modes using `--mode <MODE>` or `-m <MODE>`
 * `simple`, based on colors, *red* for removed lines, *green* for added lines
 * `diff`, prints the changes like `diff` tool would do (this is the default mode)
 * `wdiff`, prints the changes like `wdiff` tool would do
