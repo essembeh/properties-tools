@@ -5,7 +5,7 @@
 
 # properties-diff
 
-Command line tool to compare *properties* files and print differences with colors as if you were using `diff` or `colordiff` tools.
+Command line tool to compare *properties* files and print differences with colors as if you were using `wdiff` or `diff` tools.
 
 Even if *properties* files are text files, using directly `diff` is not that efficient because of key/value pairs order or format (for example using `=` or `[space]=[space]` as separator, double quoting values...). `properties-diff` compare key/value pairs but not the order nor the format.
 
@@ -25,7 +25,7 @@ optional arguments:
   --quote               use double quotes for values, example: foo="bar"
   --sep SEP             key/value separator, default is '='
   -m {simple,diff,wdiff}, --mode {simple,diff,wdiff}
-                        select a format to show differences: using colors only (simple), using diff-like format (diff) or wdiff-like (wdiff) format. Default is 'diff'
+                        select a format to show differences: using colors only (simple), using diff-like format (diff) or wdiff-like (wdiff) format. Default is 'wdiff'
   -A, --added           print added properties
   -D, --deleted         print deleted properties
   -M, --modified        print modified properties
@@ -35,9 +35,9 @@ optional arguments:
 
 
 You can see differences between the properties files using 3 modes using `--mode <MODE>` or `-m <MODE>`
+* `wdiff`, prints the changes like `wdiff` tool would do (this is the default mode)
+* `diff`, prints the changes like `diff` tool would do
 * `simple`, based on colors, *red* for removed lines, *green* for added lines
-* `diff`, prints the changes like `diff` tool would do (this is the default mode)
-* `wdiff`, prints the changes like `wdiff` tool would do
 
 ![simple](images/simple.png)
 ![diff](images/diff.png)

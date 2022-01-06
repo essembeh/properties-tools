@@ -61,8 +61,8 @@ def run(args=None):
         "-m",
         "--mode",
         choices=["simple", "diff", "wdiff"],
-        default="diff",
-        help="select a format to show differences: using colors only (simple), using diff-like format (diff) or wdiff-like (wdiff) format. Default is 'diff'",
+        default="wdiff",
+        help="select a format to show differences: using colors only (simple), using diff-like format (diff) or wdiff-like (wdiff) format. Default is 'wdiff'",
     )
     parser.add_argument(
         "-A",

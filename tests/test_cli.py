@@ -64,16 +64,16 @@ def test_wdiff(capsys):
 
 def test_quiet(capsys):
     out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} --quiet")
-    assert len(out) == 1 + ADDED + 1 + DELETED + 1 + 2 * MODIFIED
+    assert len(out) == 1 + ADDED + 1 + DELETED + 1 + MODIFIED
     assert len(err) == 0
 
 
 def test_quote(capsys):
-    out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2}")
+    out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -m diff")
     assert len(out) == NOT_QUIET + 1 + ADDED + 1 + DELETED + 1 + 2 * MODIFIED
     assert len(err) == 0
 
-    out_quote, err_quote = execute(capsys, f"{SAMPLE1} {SAMPLE2} --quote")
+    out_quote, err_quote = execute(capsys, f"{SAMPLE1} {SAMPLE2}  -m diff --quote")
     assert len(out_quote) == len(out)
     assert len(err_quote) == len(err)
 
@@ -94,7 +94,7 @@ def test_sections(capsys):
     assert len(err) == 0
 
     out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -M")
-    assert len(out) == NOT_QUIET + 1 + 2 * MODIFIED
+    assert len(out) == NOT_QUIET + 1 + MODIFIED
     assert len(err) == 0
 
     out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -AD")
@@ -102,13 +102,13 @@ def test_sections(capsys):
     assert len(err) == 0
 
     out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -AM")
-    assert len(out) == NOT_QUIET + 1 + ADDED + 1 + 2 * MODIFIED
+    assert len(out) == NOT_QUIET + 1 + ADDED + 1 + MODIFIED
     assert len(err) == 0
 
     out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -DM")
-    assert len(out) == NOT_QUIET + 1 + DELETED + 1 + 2 * MODIFIED
+    assert len(out) == NOT_QUIET + 1 + DELETED + 1 + MODIFIED
     assert len(err) == 0
 
     out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -ADM")
-    assert len(out) == NOT_QUIET + 1 + ADDED + 1 + DELETED + 1 + 2 * MODIFIED
+    assert len(out) == NOT_QUIET + 1 + ADDED + 1 + DELETED + 1 + MODIFIED
     assert len(err) == 0
