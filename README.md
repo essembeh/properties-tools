@@ -39,9 +39,9 @@ You can see differences between the properties files using 3 modes using `--mode
 * `diff`, prints the changes like `diff` tool would do
 * `simple`, based on colors, *red* for removed lines, *green* for added lines
 
-![simple](images/simple.png)
-![diff](images/diff.png)
 ![wdiff](images/wdiff.png)
+![diff](images/diff.png)
+![simple](images/simple.png)
 
 
 # Install
