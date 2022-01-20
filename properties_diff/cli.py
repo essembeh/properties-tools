@@ -3,6 +3,7 @@
 import sys
 from argparse import ArgumentParser
 from datetime import datetime
+from os import sep
 from pathlib import Path
 from typing import Dict
 
@@ -13,6 +14,8 @@ def properties_to_dict(file: Path, separator="=", comment_char="#") -> Dict[str,
     if not file.exists():
         raise FileExistsError(f"Cannot find file {file}")
     out = {}
+    if not sep:
+        raise ValueError(f"Invalid separator")
     for lineno, line in enumerate(map(str.strip, file.read_text().splitlines())):
         if len(line) == 0:
             # empty line
@@ -113,9 +116,9 @@ def run(args=None):
         )
 
     try:
-        left = properties_to_dict(args.left, separator=args.sep.strip())
+        left = properties_to_dict(args.left, separator=args.sep)
         assert len(left) > 0, f"Cannot find any property in {args.left}"
-        right = properties_to_dict(args.right, separator=args.sep.strip())
+        right = properties_to_dict(args.right, separator=args.sep)
         assert len(right) > 0, f"Cannot find any property in {args.right}"
 
         added = [key for key in sorted(right) if key not in left]
