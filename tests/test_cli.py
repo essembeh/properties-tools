@@ -93,7 +93,7 @@ def test_sections(capsys):
     assert len(out) == NOT_QUIET + 1 + DELETED
     assert len(err) == 0
 
-    out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -M")
+    out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -U")
     assert len(out) == NOT_QUIET + 1 + MODIFIED
     assert len(err) == 0
 
@@ -101,14 +101,14 @@ def test_sections(capsys):
     assert len(out) == NOT_QUIET + 1 + ADDED + 1 + DELETED
     assert len(err) == 0
 
-    out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -AM")
+    out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -AU")
     assert len(out) == NOT_QUIET + 1 + ADDED + 1 + MODIFIED
     assert len(err) == 0
 
-    out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -DM")
+    out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -DU")
     assert len(out) == NOT_QUIET + 1 + DELETED + 1 + MODIFIED
     assert len(err) == 0
 
-    out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -ADM")
+    out, err = execute(capsys, f"{SAMPLE1} {SAMPLE2} -ADU")
     assert len(out) == NOT_QUIET + 1 + ADDED + 1 + DELETED + 1 + MODIFIED
     assert len(err) == 0

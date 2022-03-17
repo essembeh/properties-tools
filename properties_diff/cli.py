@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 from datetime import datetime
 from os import sep
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Optional
 
 from colorama import Fore
 
@@ -15,7 +15,7 @@ def properties_to_dict(file: Path, separator="=", comment_char="#") -> Dict[str,
         raise FileExistsError(f"Cannot find file {file}")
     out = {}
     if not sep:
-        raise ValueError(f"Invalid separator")
+        raise ValueError("Invalid separator")
     for lineno, line in enumerate(map(str.strip, file.read_text().splitlines())):
         if len(line) == 0:
             # empty line
@@ -42,7 +42,7 @@ def properties_to_dict(file: Path, separator="=", comment_char="#") -> Dict[str,
     return out
 
 
-def run(args=None):
+def run(argv:Optional[List[str]]=None):
     parser = ArgumentParser()
     parser.add_argument(
         "-q",
@@ -84,12 +84,12 @@ def run(args=None):
         help="print deleted properties",
     )
     parser.add_argument(
-        "-M",
-        "--modified",
+        "-U",
+        "--updated",
         action="append_const",
         dest="sections",
-        const="modified",
-        help="print modified properties",
+        const="updated",
+        help="print updated properties",
     )
     parser.add_argument(
         "left",
@@ -104,7 +104,7 @@ def run(args=None):
         help="right file to compare",
     )
 
-    args = parser.parse_args(args)
+    args = parser.parse_args(argv)
 
     def quote(data: dict, key: str):
         text = data.get(key, "")
@@ -181,7 +181,7 @@ def run(args=None):
                             f"{Fore.GREEN}{{+{key}{args.sep}{quote(right, key)}+}}{Fore.RESET}"
                         )
 
-            if len(modified) and (args.sections is None or "modified" in args.sections):
+            if len(modified) and (args.sections is None or "updated" in args.sections):
                 print(
                     f"{Fore.BLUE}# Updated from {args.left} (left) to {args.right} (right){Fore.RESET}"
                 )
