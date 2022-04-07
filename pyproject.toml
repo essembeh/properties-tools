@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "properties-diff"
-version = "0.3.1"
+version = "0.4.0"
 description = "Command line tool to compare properties files"
 homepage = "https://github.com/essembeh/properties-diff"
 authors = ["Sébastien MB <seb@essembeh.org>"]
