@@ -5,7 +5,7 @@ test for patch cli
 
 
 import pytest
-from properties_diff.patch import run
+from properties_tools.patch import run
 
 from . import SAMPLE1, SAMPLE1_ALT, SAMPLE2, execute
 

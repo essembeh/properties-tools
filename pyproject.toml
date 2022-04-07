@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "properties-diff"
+name = "properties-tools"
 version = "0.4.1"
-description = "Command line tool to compare properties files"
-homepage = "https://github.com/essembeh/properties-diff"
+description = "Collection of command line tools to work with properties files (diff-like, patch-like)"
+homepage = "https://github.com/essembeh/properties-tools"
 authors = ["Sébastien MB <seb@essembeh.org>"]
 license = "Apache-2.0"
 classifiers = [
@@ -26,8 +26,8 @@ pytest-cov = ""
 rope = ""
 
 [tool.poetry.scripts]
-properties-diff = 'properties_diff.diff:run'
-properties-patch = 'properties_diff.patch:run'
+properties-diff = 'properties_tools.diff:run'
+properties-patch = 'properties_tools.patch:run'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
