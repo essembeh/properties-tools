@@ -1,7 +1,12 @@
+# pylint: disable=missing-function-docstring
+"""
+test for diff cli
+"""
+
 import shlex
 
 import pytest
-from properties_diff.cli import run
+from properties_diff.diff import run
 
 SAMPLE1 = "tests/sample1.properties"
 SAMPLE1_ALT = "tests/sample1_alt.properties"

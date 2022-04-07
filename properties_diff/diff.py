@@ -1,48 +1,22 @@
-#!/bin/env python3
+"""
+diff cli tool entrypoint
+"""
 
 import sys
 from argparse import ArgumentParser
 from datetime import datetime
-from os import sep
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from colorama import Fore
 
-
-def properties_to_dict(file: Path, separator="=", comment_char="#") -> Dict[str, str]:
-    if not file.exists():
-        raise FileExistsError(f"Cannot find file {file}")
-    out = {}
-    if not sep:
-        raise ValueError("Invalid separator")
-    for lineno, line in enumerate(map(str.strip, file.read_text().splitlines())):
-        if len(line) == 0:
-            # empty line
-            pass
-        elif line.startswith(comment_char):
-            # comment line
-            pass
-        elif separator not in line:
-            # invalid line
-            error = SyntaxError(
-                f"Invalid file, no separator '{separator}' on line {lineno}"
-            )
-            error.lineno = lineno
-            error.filename = str(file)
-            error.text = line
-            raise error
-        else:
-            index = line.index(separator)
-            key = line[0:index].strip()
-            value = line[index + len(separator) :].strip()
-            if len(value) > 1 and value[0] == value[-1] == '"':
-                value = value[1:-1]
-            out[key] = value
-    return out
+from .utils import properties_to_dict
 
 
-def run(argv:Optional[List[str]]=None):
+def run(argv: Optional[List[str]] = None):
+    """
+    diff cli
+    """
     parser = ArgumentParser()
     parser.add_argument(
         "-q",
