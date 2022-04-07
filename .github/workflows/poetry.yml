@@ -1,4 +1,4 @@
-name: Build test and publish Python app using Poetry
+name: Build & Tests
 
 on: [push]
 

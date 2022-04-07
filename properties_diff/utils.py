@@ -36,7 +36,7 @@ def properties_to_dict(file: Path, separator="=", comment_char="#") -> Dict[str,
     out = {}
     if not separator:
         raise ValueError("Invalid separator")
-    for lineno, line in enumerate(map(str.strip, file.read_text().splitlines())):
+    for lineno, line in enumerate(map(str.strip, file.read_text().splitlines()), 1):
         try:
             key, value = parse_line(
                 line, separator=separator, comment_char=comment_char
@@ -44,10 +44,18 @@ def properties_to_dict(file: Path, separator="=", comment_char="#") -> Dict[str,
             if key is not None:
                 out[key] = value
         except ValueError as ex:
-            error = SyntaxError(f"Invalid file, {ex}' on line {lineno}")
-            error.lineno = lineno
-            error.filename = str(file)
-            error.text = line
-            raise error
-
+            raise syntax_error(ex, file, line, lineno)
     return out
+
+
+def syntax_error(
+    error: BaseException, file: Path, line: str, lineno: int
+) -> SyntaxError:
+    """
+    build a syntax error from any exception raised while parsing a file
+    """
+    error = SyntaxError(f"Invalid file, {error}' on line {lineno}")
+    error.lineno = lineno
+    error.filename = str(file)
+    error.text = line
+    return error
