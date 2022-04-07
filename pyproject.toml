@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "properties-tools"
-version = "0.5.0"
+version = "0.5.1"
 description = "Collection of command line tools to work with properties files (diff-like, patch-like)"
 homepage = "https://github.com/essembeh/properties-tools"
 authors = ["Sébastien MB <seb@essembeh.org>"]
