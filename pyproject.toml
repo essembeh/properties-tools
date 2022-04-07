@@ -8,12 +8,13 @@ license = "Apache-2.0"
 classifiers = [
     "Development Status :: 4 - Beta",
     "License :: OSI Approved :: Apache Software License",
-    "Topic :: Utilities"
+    "Topic :: Utilities",
+    "Topic :: Software Development"
 ]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 colorama = ""
 
 
