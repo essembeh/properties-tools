@@ -120,7 +120,7 @@ def run(argv: Optional[List[str]] = None):
                     return False
         return True
 
-    def print_line(line: str, style: Optional[str] = None):
+    def print_line(line: str, style: str = ""):
         """
         print a line with optional color, and keep it to write outputfile at the end
         """
@@ -201,7 +201,7 @@ def run(argv: Optional[List[str]] = None):
                     force=True,
                 )
             ):
-                args.output.write_text("\n".join(output_content))
+                args.output.write_text("\n".join(output_content) + "\n")
 
     except BaseException as exc:
         print(f"{Fore.RED}ERROR: {exc}{Fore.RESET}", file=sys.stderr)
