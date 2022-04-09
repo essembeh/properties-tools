@@ -32,12 +32,6 @@ def run(argv: Optional[List[str]] = None):
         help="insert comment when property is added, updated or deleted",
     )
     parser.add_argument(
-        "-f",
-        "--force",
-        action="store_true",
-        help="force output file (--output) overwrite if it already exists",
-    )
-    parser.add_argument(
         "-i",
         "--interactive",
         action="store_true",
@@ -87,12 +81,25 @@ def run(argv: Optional[List[str]] = None):
         required=True,
         help="patch file",
     )
-    parser.add_argument(
+    output_group = parser.add_mutually_exclusive_group()
+    output_group.add_argument(
         "-o",
         "--output",
         type=Path,
         metavar="output.properties",
         help="modified file",
+    )
+    output_group.add_argument(
+        "-w",
+        "--overwrite",
+        action="store_true",
+        help="update input properties file in place",
+    )
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="force output file (--output) overwrite if it already exists",
     )
     parser.add_argument(
         "source",
@@ -107,7 +114,7 @@ def run(argv: Optional[List[str]] = None):
             "at least one action is required --add|-A, --update|-U, --delete|-D"
         )
 
-    output_content = [] if args.output else None
+    output_content = [] if args.output or args.overwrite else None
 
     def confirm(message: str, force: bool = False):
         if force or args.interactive:
@@ -135,6 +142,13 @@ def run(argv: Optional[List[str]] = None):
         return f'"{text}"' if args.quote else text
 
     try:
+
+        # check output file does not exists
+        if args.output and args.output.exists():
+            raise ValueError(
+                "output file already exists, use '--force' to overwrite it"
+            )
+
         patches = {}
         for patch in args.patch:
             patches.update(properties_to_dict(patch, separator=args.sep))
@@ -192,16 +206,11 @@ def run(argv: Optional[List[str]] = None):
                         print_line(f"# {date}  add: {key}", style=Fore.GREEN)
                     print_line(line, style=Fore.GREEN)
 
-        if output_content and len(output_content) > 0 and args.output is not None:
-            if (
-                not args.output.exists()
-                or args.force
-                or confirm(
-                    f"Output file already exists: {args.output}, fo you want to overwrite it?",
-                    force=True,
-                )
-            ):
-                args.output.write_text("\n".join(output_content) + "\n")
+        if output_content and len(output_content) > 0:
+            # write output file
+            (args.source if args.overwrite else args.output).write_text(
+                "\n".join(output_content) + "\n"
+            )
 
     except BaseException as exc:
         print(f"{Fore.RED}ERROR: {exc}{Fore.RESET}", file=sys.stderr)

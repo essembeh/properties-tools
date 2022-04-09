@@ -4,6 +4,8 @@ test for patch cli
 """
 
 
+from shutil import copy
+
 import pytest
 from properties_tools.patch import run
 
@@ -92,3 +94,33 @@ def test_output(capsys, tmp_path):
     assert "database.host=localhost" not in out
     assert output.exists()
     assert output.read_text().splitlines() == out
+
+
+def test_no_overwrite(capsys, tmp_path):
+    source = tmp_path / "source.properties"
+    patch = tmp_path / "patch.properties"
+    output = tmp_path / "output.properties"
+
+    copy(SAMPLE1, source)
+    copy(SAMPLE2, patch)
+
+    output = tmp_path / "output.properties"
+    execute(run, capsys, f"{source}  --patch {patch} -ADU --output {output} --comments")
+    assert output.exists()
+
+    with pytest.raises(SystemExit):
+        execute(
+            run, capsys, f"{source}  --patch {patch} -ADU --output {output} --comments"
+        )
+
+
+def test_in_place(capsys, tmp_path):
+    source = tmp_path / "source.properties"
+    patch = tmp_path / "patch.properties"
+
+    copy(SAMPLE1, source)
+    copy(SAMPLE2, patch)
+
+    source_text = source.read_text()
+    execute(run, capsys, f"{source}  --patch {patch} -ADU --overwrite --comments")
+    assert source_text != source.read_text()
