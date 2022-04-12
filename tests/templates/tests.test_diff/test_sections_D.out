@@ -1,0 +1,4 @@
+format:[33m--- {left}[39m (left)    {left_date}
+format:[33m+++ {right}[39m (right)    {right_date}
+format:[34m# Only in {left} (left)[39m
+[31m[-database.host=localhost-][39m

@@ -4,13 +4,12 @@ diff cli tool entrypoint
 
 import sys
 from argparse import ArgumentParser
-from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
 from colorama import Fore
 
-from .utils import properties_to_dict
+from .utils import file_date, properties_to_dict
 
 
 def run(argv: Optional[List[str]] = None):
@@ -84,11 +83,6 @@ def run(argv: Optional[List[str]] = None):
         text = data.get(key, "")
         return f'"{text}"' if args.quote else text
 
-    def date(file: Path):
-        return datetime.isoformat(
-            datetime.fromtimestamp(file.stat().st_mtime), timespec="seconds", sep=" "
-        )
-
     try:
         left = properties_to_dict(args.left, separator=args.sep)
         assert len(left) > 0, f"Cannot find any property in {args.left}"
@@ -106,17 +100,17 @@ def run(argv: Optional[List[str]] = None):
             if not args.quiet:
                 if args.mode == "simple":
                     print(
-                        f"{Fore.YELLOW}*** {args.left}{Fore.RESET} (left)    {date(args.left)}"
+                        f"{Fore.YELLOW}*** {args.left}{Fore.RESET} (left)    {file_date(args.left)}"
                     )
                     print(
-                        f"{Fore.YELLOW}*** {args.right}{Fore.RESET} (right)    {date(args.right)}"
+                        f"{Fore.YELLOW}*** {args.right}{Fore.RESET} (right)    {file_date(args.right)}"
                     )
                 else:
                     print(
-                        f"{Fore.YELLOW}--- {args.left}{Fore.RESET} (left)    {date(args.left)}"
+                        f"{Fore.YELLOW}--- {args.left}{Fore.RESET} (left)    {file_date(args.left)}"
                     )
                     print(
-                        f"{Fore.YELLOW}+++ {args.right}{Fore.RESET} (right)    {date(args.right)}"
+                        f"{Fore.YELLOW}+++ {args.right}{Fore.RESET} (right)    {file_date(args.right)}"
                     )
 
             if len(deleted) and (args.sections is None or "deleted" in args.sections):

@@ -1,0 +1,2 @@
+[31mERROR: Invalid file, no separator '/'' on line 2 (sample1.properties, line 2)[39m
+format:[33m{file}:2[39m  database.type=postgresql

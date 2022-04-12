@@ -1,0 +1,7 @@
+# just a comment
+database.type=mysql
+database.port=5432
+# and another comment
+database.user=dbuser
+database.password=foobar
+database.version=12

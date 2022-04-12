@@ -1,0 +1,11 @@
+# just a comment
+matches:# 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]  update: database.type=postgresql
+database.type=mysql
+matches:# 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]  remove: database.host=localhost
+database.port=5432
+# and another comment
+matches:# 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]  update: database.user=test
+database.user=dbuser
+database.password=foobar
+matches:# 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]  add: database.version
+database.version=12

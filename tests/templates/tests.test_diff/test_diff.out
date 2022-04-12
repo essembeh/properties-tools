@@ -1,0 +1,11 @@
+format:[33m--- {left}[39m (left)    {left_date}
+format:[33m+++ {right}[39m (right)    {right_date}
+format:[34m# Only in {left} (left)[39m
+[31m- database.host=localhost[39m
+format:[34m# Only in {right} (right)[39m
+[32m+ database.version=12[39m
+format:[34m# Updated from {left} (left) to {right} (right)[39m
+[31m- database.type=postgresql[39m
+[32m+ database.type=mysql[39m
+[31m- database.user=test[39m
+[32m+ database.user=dbuser[39m

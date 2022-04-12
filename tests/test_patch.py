@@ -3,124 +3,129 @@
 test for patch cli
 """
 
-
-from shutil import copy
+from shlex import split
 
 import pytest
 from properties_tools.patch import run
 
-from . import SAMPLE1, SAMPLE1_ALT, SAMPLE2, execute
-
-NOT_QUIET = 2
-ADDED = 1
-DELETED = 1
-MODIFIED = 2
+from . import *
 
 
-def test_bad_sep(capsys):
+def template(filename: str):
+    return TEMPLATES_DIR / __name__ / filename
+
+
+def test_bad_sep(capsys, sample1):
     with pytest.raises(SystemExit):
-        execute(run, capsys, f"{SAMPLE1}  --patch {SAMPLE1} --add --sep /")
-    captured = capsys.readouterr()
-    assert len(captured.out.splitlines()) == 0
-    assert len(captured.err.splitlines()) == 2
-
-
-def test_samefile(capsys):
-    out, err = execute(run, capsys, f"{SAMPLE1}  --patch {SAMPLE1} --add")
-    assert len(out) == 7
-    assert len(err) == 0
-    assert "database.type=postgresql" in out
-    assert "database.type=mysql" not in out
-
-
-def test_altfile(capsys):
-    out, err = execute(run, capsys, f"{SAMPLE1}  --patch {SAMPLE1_ALT} --add")
-    assert len(out) == 7
-    assert len(err) == 0
-    assert "database.type=postgresql" in out
-    assert "database.type=mysql" not in out
-
-
-def test_update(capsys):
-    out, err = execute(run, capsys, f"{SAMPLE1}  --patch {SAMPLE2} -U")
-    assert len(out) == 7
-    assert len(err) == 0
-    assert "database.type=postgresql" not in out
-    assert "database.type=mysql" in out
-    assert "database.version=12" not in out
-    assert "database.host=localhost" in out
-
-
-def test_add(capsys):
-    out, err = execute(run, capsys, f"{SAMPLE1}  --patch {SAMPLE2} -A")
-    assert len(out) == 8
-    assert len(err) == 0
-    assert "database.type=postgresql" in out
-    assert "database.type=mysql" not in out
-    assert "database.version=12" in out
-    assert "database.host=localhost" in out
-
-
-def test_delete(capsys):
-    out, err = execute(run, capsys, f"{SAMPLE1}  --patch {SAMPLE2} -D")
-    assert len(out) == 6
-    assert len(err) == 0
-    assert "database.type=postgresql" in out
-    assert "database.type=mysql" not in out
-    assert "database.version=12" not in out
-    assert "database.host=localhost" not in out
-
-
-def test_adu(capsys):
-    out, err = execute(run, capsys, f"{SAMPLE1}  --patch {SAMPLE2} -ADU")
-    assert len(out) == 7
-    assert len(err) == 0
-    assert "database.type=postgresql" not in out
-    assert "database.type=mysql" in out
-    assert "database.version=12" in out
-    assert "database.host=localhost" not in out
-
-
-def test_output(capsys, tmp_path):
-    output = tmp_path / "output.properties"
-    out, err = execute(
-        run, capsys, f"{SAMPLE1}  --patch {SAMPLE2} -ADU --output {output} --comments"
+        run(split(f"{sample1}  --patch {sample1} --add --sep /"))
+    assert_capsys(
+        capsys,
+        stdout_reference="",
+        stderr_reference=template("test_bad_sep.err"),
+        format_keywords={"file": sample1},
     )
-    assert len(out) == 11
-    assert len(err) == 0
-    assert "database.type=postgresql" not in out
-    assert "database.type=mysql" in out
-    assert "database.version=12" in out
-    assert "database.host=localhost" not in out
+
+
+def test_samefile(capsys, sample1):
+    run(split(f"{sample1}  --patch {sample1} --add"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_samefile.out"),
+        stderr_reference="",
+    )
+
+
+def test_altfile(capsys, sample1, sample1_alt):
+    run(split(f"{sample1}  --patch {sample1_alt} --add"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_altfile.out"),
+        stderr_reference="",
+    )
+
+
+def test_update(capsys, sample1, sample2):
+    run(split(f"{sample1}  --patch {sample2} -U"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_update.out"),
+        stderr_reference="",
+    )
+
+
+def test_add(capsys, sample1, sample2):
+    run(split(f"{sample1}  --patch {sample2} -A"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_add.out"),
+        stderr_reference="",
+    )
+
+
+def test_delete(capsys, sample1, sample2):
+    run(split(f"{sample1}  --patch {sample2} -D"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_delete.out"),
+        stderr_reference="",
+    )
+
+
+def test_adu(capsys, sample1, sample2):
+    run(split(f"{sample1}  --patch {sample2} -ADU"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_adu.out"),
+        stderr_reference="",
+    )
+
+
+def test_comments(capsys, sample1, sample2):
+    run(split(f"{sample1}  --patch {sample2} -ADU --comments"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_comments.out"),
+        stderr_reference="",
+    )
+
+
+def test_output(capsys, tmp_path, sample1, sample2):
+    output = tmp_path / "output.properties"
+    run(split(f"{sample1}  --patch {sample2} -ADU --output {output}"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_output.out"),
+        stderr_reference="",
+    )
     assert output.exists()
-    assert output.read_text().splitlines() == out
+    assert output.read_text() == template("test_output.out").read_text()
 
 
-def test_no_overwrite(capsys, tmp_path):
-    source = tmp_path / "source.properties"
-    patch = tmp_path / "patch.properties"
+def test_no_overwrite(tmp_path, sample1, sample2):
     output = tmp_path / "output.properties"
-
-    copy(SAMPLE1, source)
-    copy(SAMPLE2, patch)
-
-    output = tmp_path / "output.properties"
-    execute(run, capsys, f"{source}  --patch {patch} -ADU --output {output} --comments")
+    run(split(f"{sample1}  --patch {sample2} -ADU --output {output}"))
     assert output.exists()
 
     with pytest.raises(SystemExit):
-        execute(
-            run, capsys, f"{source}  --patch {patch} -ADU --output {output} --comments"
-        )
+        run(split(f"{sample1}  --patch {sample2} -ADU --output {output}"))
 
 
-def test_in_place(capsys, tmp_path):
-    source = tmp_path / "source.properties"
-    patch = tmp_path / "patch.properties"
+def test_in_place(capsys, sample1, sample2):
+    source_text = sample1.read_text()
+    run(split(f"{sample1}  --patch {sample2} -ADU --overwrite"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_in_place.out"),
+        stderr_reference="",
+    )
+    assert source_text != sample1.read_text()
+    assert sample1.read_text() == template("test_in_place.out").read_text()
 
-    copy(SAMPLE1, source)
-    copy(SAMPLE2, patch)
 
-    source_text = source.read_text()
-    execute(run, capsys, f"{source}  --patch {patch} -ADU --overwrite --comments")
-    assert source_text != source.read_text()
+def test_color(capsys, sample1, sample2):
+    run(split(f"{sample1}  --patch {sample2} -ADU --color --comment"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_color.out"),
+        stderr_reference="",
+    )

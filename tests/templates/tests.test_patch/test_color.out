@@ -1,0 +1,11 @@
+[2m# just a comment[0m
+ends:  update: database.type=postgresql[0m
+[33mdatabase.type=mysql[0m
+ends: remove: database.host=localhost[0m
+database.port=5432[0m
+[2m# and another comment[0m
+ends: update: database.user=test[0m
+[33mdatabase.user=dbuser[0m
+database.password=foobar[0m
+ends: add: database.version[0m
+[32mdatabase.version=12[0m

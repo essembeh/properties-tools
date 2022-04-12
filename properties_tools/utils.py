@@ -1,5 +1,12 @@
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional, Tuple
+
+
+def file_date(file: Path):
+    return datetime.isoformat(
+        datetime.fromtimestamp(file.stat().st_mtime), timespec="seconds", sep=" "
+    )
 
 
 def parse_line(

@@ -1,0 +1,6 @@
+# just a comment
+database.type=postgresql
+database.port=5432
+# and another comment
+database.user=test
+database.password=foobar
