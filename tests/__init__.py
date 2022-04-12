@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, Union
 from pytest import fixture
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
+GEN_TEMPLATE = "PYTEST_GEN_TEMPLATE"
 
 
 def sample(filename: str, tmp_path):
@@ -16,7 +17,7 @@ def sample(filename: str, tmp_path):
     copy(ref, out)
     from time import sleep
 
-    if getenv("PYTEST_INIT_REFERENCE_FILES") == "1":
+    if getenv(GEN_TEMPLATE) == "1":
         # to have different timestamps
         sleep(1)
     return out
@@ -65,7 +66,7 @@ def assert_out(
         assert content == reference
     else:
         assert isinstance(reference, Path)
-        if getenv("PYTEST_INIT_REFERENCE_FILES") == "1":
+        if getenv(GEN_TEMPLATE) == "1":
             reference.parent.mkdir(exist_ok=True, parents=True)
             if format_keywords:
                 lines = []
@@ -79,9 +80,7 @@ def assert_out(
                 content = "".join(lines)
             reference.write_text(content)
         else:
-            assert (
-                reference.exists()
-            ), "Init template with PYTEST_INIT_REFERENCE_FILES=1"
+            assert reference.exists(), f"Init template with {GEN_TEMPLATE}=1"
             content_lines = content.splitlines()
             reference_lines = reference.read_text().splitlines()
             assert len(content_lines) == len(

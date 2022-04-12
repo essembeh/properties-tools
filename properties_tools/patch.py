@@ -6,12 +6,12 @@ import sys
 from argparse import ArgumentParser
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Callable, List, Optional
 
-from colorama import Fore, Style
 from colorama.ansi import Cursor, clear_line
 
-from .utils import parse_line, properties_to_dict, syntax_error
+from .color import Color
+from .utils import parse_file, propertiesfile_to_dict
 
 
 def run(argv: Optional[List[str]] = None):
@@ -19,11 +19,20 @@ def run(argv: Optional[List[str]] = None):
     patch cli
     """
     parser = ArgumentParser()
-    parser.add_argument(
-        "-c",
+    color_group = parser.add_mutually_exclusive_group()
+    color_group.add_argument(
         "--color",
-        action="store_true",
-        help="print colors",
+        action="store_const",
+        dest="color",
+        const=True,
+        help="force colors",
+    )
+    color_group.add_argument(
+        "--nocolor",
+        action="store_const",
+        dest="color",
+        const=False,
+        help="disable colors",
     )
     parser.add_argument(
         "--comments",
@@ -109,6 +118,9 @@ def run(argv: Optional[List[str]] = None):
     )
 
     args = parser.parse_args(argv)
+
+    color = Color(args.color)
+
     if args.actions is None:
         parser.error(
             "at least one action is required --add|-A, --update|-U, --delete|-D"
@@ -127,22 +139,21 @@ def run(argv: Optional[List[str]] = None):
                     return False
         return True
 
-    def print_line(line: str, style: str = ""):
+    def print_line(line: Any, color_fnc: Optional[Callable] = None):
         """
         print a line with optional color, and keep it to write outputfile at the end
         """
+        assert line is not None
+        line = str(line)
         if output_content is not None:
             output_content.append(line)
-        print(
-            f"{style if args.color else ''}{line}{Style.RESET_ALL if args.color else ''}"
-        )
+        print(color_fnc(line) if color_fnc else line)
 
     def quote(data: dict, key: str):
         text = data.get(key, "")
         return f'"{text}"' if args.quote else text
 
     try:
-
         # check output file does not exists
         if args.output and args.output.exists():
             raise ValueError(
@@ -151,60 +162,58 @@ def run(argv: Optional[List[str]] = None):
 
         patches = {}
         for patch in args.patch:
-            patches.update(properties_to_dict(patch, separator=args.sep))
+            patches.update(propertiesfile_to_dict(patch, separator=args.sep))
 
-        date = datetime.now().isoformat(timespec="seconds", sep=" ")
+        date_now = datetime.now().isoformat(timespec="seconds", sep=" ")
+
         source_keys = []
-        for lineno, line in enumerate(args.source.read_text().splitlines(), 1):
-            try:
-                key, value = parse_line(line.strip(), separator=args.sep)
-                source_keys.append(key)
-                if key is None:
-                    # comment or blank line
-                    print_line(line, Style.DIM)
-                elif key not in patches:
-                    if "delete" in args.actions and confirm(
-                        f"Delete {Fore.RED}{line}{Fore.RESET} ?"
-                    ):
-                        # delete or comment the line
-                        if args.comments:
-                            print_line(f"# {date}  remove: {line}", style=Fore.RED)
-                    else:
-                        # discard change, keep the line
-                        print_line(line)
-                elif value != patches[key]:
-                    if "update" in args.actions and confirm(
-                        f"Update {Fore.YELLOW}{key}={Fore.RESET}{Fore.RED}{value}{Fore.RESET},{Fore.GREEN}{patches[key]}{Fore.RESET} ?"
-                    ):
-                        # update the line
-                        if args.comments:
-                            print_line(
-                                f"# {date}  update: {line}",
-                                style=Fore.YELLOW,
-                            )
-                        print_line(
-                            f"{key}{args.sep}{quote(patches, key)}", style=Fore.YELLOW
-                        )
-                    else:
-                        # discard change, keep the line
-                        print_line(line)
+        for parsed_line in list(parse_file(args.source, separator=args.sep)):
+            if parsed_line.is_property():
+                source_keys.append(parsed_line.key)
+
+            if not parsed_line.is_property():
+                # comment or blank line
+                print_line(parsed_line, color.grey)
+            elif parsed_line.key not in patches:
+                if "delete" in args.actions and confirm(
+                    f"Delete {color.red(parsed_line)} ?"
+                ):
+                    # delete or comment the line
+                    if args.comments:
+                        print_line(f"# {date_now}  remove: {parsed_line}", color.red)
                 else:
-                    # same key/value, keep the line
-                    print_line(line)
-            except ValueError as ex:
-                raise syntax_error(ex, args.source, line, lineno)
+                    # discard change, keep the line
+                    print_line(parsed_line)
+            elif parsed_line.value != patches[parsed_line.key]:
+                if "update" in args.actions and confirm(
+                    f"Update {color.yellow(parsed_line.key)}={color.red(parsed_line.value)},{color.green(patches[parsed_line.key])} ?"
+                ):
+                    # update the line
+                    if args.comments:
+                        print_line(
+                            f"# {date_now}  update: {parsed_line}",
+                            color.yellow,
+                        )
+                    print_line(
+                        f"{parsed_line.key}{args.sep}{quote(patches, parsed_line.key)}",
+                        color.yellow,
+                    )
+                else:
+                    # discard change, keep the line
+                    print_line(parsed_line)
+            else:
+                # same key/value, keep the line
+                print_line(parsed_line)
 
         # add new properties
         if "add" in args.actions:
-            for key, value in patches.items():
+            for key in patches:
                 line = f"{key}{args.sep}{quote(patches, key)}"
-                if key not in source_keys and confirm(
-                    f"Add {Fore.GREEN}{line}{Fore.RESET} ?"
-                ):
+                if key not in source_keys and confirm(f"Add {color.green(line)} ?"):
                     # add property
                     if args.comments:
-                        print_line(f"# {date}  add: {key}", style=Fore.GREEN)
-                    print_line(line, style=Fore.GREEN)
+                        print_line(f"# {date_now}  add: {key}", color.green)
+                    print_line(line, color.green)
 
         if output_content and len(output_content) > 0:
             # write output file
@@ -213,10 +222,12 @@ def run(argv: Optional[List[str]] = None):
             )
 
     except BaseException as exc:
-        print(f"{Fore.RED}ERROR: {exc}{Fore.RESET}", file=sys.stderr)
+        print(color.red(f"ERROR: {exc}"), file=sys.stderr)
         if isinstance(exc, SyntaxError):
             print(
-                f"{Fore.YELLOW}{exc.filename}:{exc.lineno}{Fore.RESET}  {exc.text}",
+                color.yellow(f"[{exc.filename}:{exc.lineno}]"),
+                "",
+                exc.text,
                 file=sys.stderr,
             )
         sys.exit(1)

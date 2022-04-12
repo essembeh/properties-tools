@@ -7,9 +7,8 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import List, Optional
 
-from colorama import Fore
-
-from .utils import file_date, properties_to_dict
+from .color import Color
+from .utils import file_date, propertiesfile_to_dict
 
 
 def run(argv: Optional[List[str]] = None):
@@ -28,6 +27,22 @@ def run(argv: Optional[List[str]] = None):
         action="store_true",
         help='use double quotes for values, example: foo="bar"',
     )
+    color_group = parser.add_mutually_exclusive_group()
+    color_group.add_argument(
+        "--color",
+        action="store_const",
+        dest="color",
+        const=True,
+        help="force colors",
+    )
+    color_group.add_argument(
+        "--nocolor",
+        action="store_const",
+        dest="color",
+        const=False,
+        help="disable colors",
+    )
+
     parser.add_argument(
         "--sep",
         default="=",
@@ -79,14 +94,16 @@ def run(argv: Optional[List[str]] = None):
 
     args = parser.parse_args(argv)
 
+    color = Color(args.color)
+
     def quote(data: dict, key: str):
         text = data.get(key, "")
         return f'"{text}"' if args.quote else text
 
     try:
-        left = properties_to_dict(args.left, separator=args.sep)
+        left = propertiesfile_to_dict(args.left, separator=args.sep)
         assert len(left) > 0, f"Cannot find any property in {args.left}"
-        right = properties_to_dict(args.right, separator=args.sep)
+        right = propertiesfile_to_dict(args.right, separator=args.sep)
         assert len(right) > 0, f"Cannot find any property in {args.right}"
 
         added = [key for key in sorted(right) if key not in left]
@@ -100,86 +117,90 @@ def run(argv: Optional[List[str]] = None):
             if not args.quiet:
                 if args.mode == "simple":
                     print(
-                        f"{Fore.YELLOW}*** {args.left}{Fore.RESET} (left)    {file_date(args.left)}"
+                        color.yellow("***"),
+                        color.yellow(args.left),
+                        "(left)",
+                        "  ",
+                        file_date(args.left),
                     )
                     print(
-                        f"{Fore.YELLOW}*** {args.right}{Fore.RESET} (right)    {file_date(args.right)}"
+                        color.yellow("***"),
+                        color.yellow(args.right),
+                        "(right)",
+                        "  ",
+                        file_date(args.right),
                     )
                 else:
                     print(
-                        f"{Fore.YELLOW}--- {args.left}{Fore.RESET} (left)    {file_date(args.left)}"
+                        color.yellow("---"),
+                        color.yellow(args.left),
+                        "(left)",
+                        "  ",
+                        file_date(args.left),
                     )
                     print(
-                        f"{Fore.YELLOW}+++ {args.right}{Fore.RESET} (right)    {file_date(args.right)}"
+                        color.yellow("+++"),
+                        color.yellow(args.right),
+                        "(right)",
+                        "  ",
+                        file_date(args.right),
                     )
 
             if len(deleted) and (args.sections is None or "deleted" in args.sections):
-                print(f"{Fore.BLUE}# Only in {args.left} (left){Fore.RESET}")
+                print(color.blue(f"# Only in {args.left} (left)"))
                 if args.mode == "simple":
                     for key in deleted:
-                        print(
-                            f"{Fore.RED}{key}{args.sep}{quote(left, key)}{Fore.RESET}"
-                        )
+                        print(color.red(f"{key}{args.sep}{quote(left, key)}"))
                 elif args.mode == "diff":
                     for key in deleted:
-                        print(
-                            f"{Fore.RED}- {key}{args.sep}{quote(left, key)}{Fore.RESET}"
-                        )
+                        print(color.red(f"- {key}{args.sep}{quote(left, key)}"))
                 elif args.mode == "wdiff":
                     for key in deleted:
-                        print(
-                            f"{Fore.RED}[-{key}{args.sep}{quote(left, key)}-]{Fore.RESET}"
-                        )
+                        print(color.red(f"[-{key}{args.sep}{quote(left, key)}-]"))
 
             if len(added) and (args.sections is None or "added" in args.sections):
-                print(f"{Fore.BLUE}# Only in {args.right} (right){Fore.RESET}")
+                print(color.blue(f"# Only in {args.right} (right)"))
                 if args.mode == "simple":
                     for key in added:
-                        print(
-                            f"{Fore.GREEN}{key}{args.sep}{quote(right, key)}{Fore.RESET}"
-                        )
+                        print(color.green(f"{key}{args.sep}{quote(right, key)}"))
                 elif args.mode == "diff":
                     for key in added:
-                        print(
-                            f"{Fore.GREEN}+ {key}{args.sep}{quote(right, key)}{Fore.RESET}"
-                        )
+                        print(color.green(f"+ {key}{args.sep}{quote(right, key)}"))
                 elif args.mode == "wdiff":
                     for key in added:
-                        print(
-                            f"{Fore.GREEN}{{+{key}{args.sep}{quote(right, key)}+}}{Fore.RESET}"
-                        )
+                        print(color.green(f"{{+{key}{args.sep}{quote(right, key)}+}}"))
 
             if len(modified) and (args.sections is None or "updated" in args.sections):
                 print(
-                    f"{Fore.BLUE}# Updated from {args.left} (left) to {args.right} (right){Fore.RESET}"
+                    color.blue(
+                        f"# Updated from {args.left} (left) to {args.right} (right)"
+                    )
                 )
                 if args.mode == "simple":
                     for key in modified:
-                        print(
-                            f"{Fore.RED}{key}{args.sep}{quote(left, key)}{Fore.RESET}"
-                        )
+                        print(color.red(f"{key}{args.sep}{quote(left, key)}"))
                     for key in modified:
-                        print(
-                            f"{Fore.GREEN}{key}{args.sep}{quote(right, key)}{Fore.RESET}"
-                        )
+                        print(color.green(f"{key}{args.sep}{quote(right, key)}"))
                 elif args.mode == "diff":
                     for key in modified:
-                        print(
-                            f"{Fore.RED}- {key}{args.sep}{quote(left, key)}{Fore.RESET}"
-                        )
-                        print(
-                            f"{Fore.GREEN}+ {key}{args.sep}{quote(right, key)}{Fore.RESET}"
-                        )
+                        print(color.red(f"- {key}{args.sep}{quote(left, key)}"))
+                        print(color.green(f"+ {key}{args.sep}{quote(right, key)}"))
                 elif args.mode == "wdiff":
                     for key in modified:
                         print(
-                            f"{key}{args.sep}{Fore.RED}[-{quote(left, key)}-]{Fore.GREEN}{{+{quote(right, key)}+}}{Fore.RESET}"
+                            key,
+                            args.sep,
+                            color.red(f"[-{quote(left, key)}-]"),
+                            color.green(f"{{+{quote(right, key)}+}}"),
+                            sep="",
                         )
     except BaseException as exc:
-        print(f"{Fore.RED}ERROR: {exc}{Fore.RESET}", file=sys.stderr)
+        print(color.red(f"ERROR: {exc}"), file=sys.stderr)
         if isinstance(exc, SyntaxError):
             print(
-                f"{Fore.YELLOW}{exc.filename}:{exc.lineno}{Fore.RESET}  {exc.text}",
+                color.yellow(f"[{exc.filename}:{exc.lineno}]"),
+                "",
+                exc.text,
                 file=sys.stderr,
             )
         sys.exit(1)

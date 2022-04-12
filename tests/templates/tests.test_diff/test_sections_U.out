@@ -1,5 +1,5 @@
-format:[33m--- {left}[39m (left)    {left_date}
-format:[33m+++ {right}[39m (right)    {right_date}
-format:[34m# Updated from {left} (left) to {right} (right)[39m
-database.type=[31m[-postgresql-][32m{+mysql+}[39m
-database.user=[31m[-test-][32m{+dbuser+}[39m
+format:--- {left} (left)    {left_date}
+format:+++ {right} (right)    {right_date}
+format:# Updated from {left} (left) to {right} (right)
+database.type=[-postgresql-]{+mysql+}
+database.user=[-test-]{+dbuser+}

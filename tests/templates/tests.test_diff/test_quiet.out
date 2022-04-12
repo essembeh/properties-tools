@@ -1,7 +1,7 @@
-format:[34m# Only in {left} (left)[39m
-[31m[-database.host=localhost-][39m
-format:[34m# Only in {right} (right)[39m
-[32m{+database.version=12+}[39m
-format:[34m# Updated from {left} (left) to {right} (right)[39m
-database.type=[31m[-postgresql-][32m{+mysql+}[39m
-database.user=[31m[-test-][32m{+dbuser+}[39m
+format:# Only in {left} (left)
+[-database.host=localhost-]
+format:# Only in {right} (right)
+{+database.version=12+}
+format:# Updated from {left} (left) to {right} (right)
+database.type=[-postgresql-]{+mysql+}
+database.user=[-test-]{+dbuser+}

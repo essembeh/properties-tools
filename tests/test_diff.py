@@ -168,3 +168,27 @@ def test_sections(capsys, sample1, sample2):
         stderr_reference="",
         format_keywords=keywords(left=sample1, right=sample2),
     )
+
+
+def test_colors(capsys, sample1, sample2):
+    run(split(f"{sample1} {sample2} --mode simple --color"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_colors_simple.out"),
+        stderr_reference="",
+        format_keywords=keywords(left=sample1, right=sample2),
+    )
+    run(split(f"{sample1} {sample2} --mode wdiff --color"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_colors_wdiff.out"),
+        stderr_reference="",
+        format_keywords=keywords(left=sample1, right=sample2),
+    )
+    run(split(f"{sample1} {sample2} --mode diff --color"))
+    assert_capsys(
+        capsys,
+        stdout_reference=template("test_colors_diff.out"),
+        stderr_reference="",
+        format_keywords=keywords(left=sample1, right=sample2),
+    )
