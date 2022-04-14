@@ -1,2 +1,2 @@
 ERROR: Invalid file, no separator found (sample1.properties, line 2)
-format:[{left}:2]  database.type=postgresql
+format:[{tmp_path}/sample1.properties:2]  database.type=postgresql

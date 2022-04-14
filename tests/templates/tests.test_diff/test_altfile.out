@@ -1,1 +1,1 @@
-format:Files {left} and {right} are similar
+format:Files {tmp_path}/sample1.properties and {tmp_path}/sample1_alt.properties are similar

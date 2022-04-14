@@ -1,63 +1,59 @@
-from os import getenv
+# pylint: disable=missing-function-docstring,missing-class-docstring
+from datetime import datetime
+from os import getenv, utime
 from pathlib import Path
 from re import fullmatch
-from shutil import copy
+from shutil import copytree
 from typing import Any, Dict, Optional, Union
 
 from pytest import fixture
 
+SAMPLES_DIR = Path(__file__).parent / "samples"
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 GEN_TEMPLATE = "PYTEST_GEN_TEMPLATE"
 
 
-def sample(filename: str, tmp_path):
-    ref = Path(__file__).parent / filename
-    out = tmp_path / ref.name
-    assert not out.exists()
-    copy(ref, out)
-    from time import sleep
+def set_mtime(file: Path, date_str: str):
+    timestamp = datetime.fromisoformat(date_str).timestamp()
+    utime(file, (timestamp, timestamp))
 
-    if getenv(GEN_TEMPLATE) == "1":
-        # to have different timestamps
-        sleep(1)
+
+def format_line(text: str, variables: Dict[str, Any]):
+    return text.format(**variables)
+
+
+def unformat_line(text: str, variables: Dict[str, Any]):
+    out = text
+    for key, value in variables.items():
+        out = out.replace(str(value), "{" + key + "}")
+    return text if text == out else f"format:{out}"
+
+
+@fixture
+def samples(tmp_path) -> Path:
+    out = copytree(SAMPLES_DIR, tmp_path, dirs_exist_ok=True)
+    set_mtime(out / "sample1.properties", "2020-12-12T12:00:00")
+    set_mtime(out / "sample1_alt.properties", "2020-12-12T12:01:00")
+    set_mtime(out / "sample2.properties", "2020-12-12T12:02:00")
+    set_mtime(out / "sample3.properties", "2020-12-12T12:03:00")
     return out
-
-
-@fixture
-def sample1(tmp_path):
-    return sample("sample1.properties", tmp_path)
-
-
-@fixture
-def sample1_alt(tmp_path):
-    return sample("sample1_alt.properties", tmp_path)
-
-
-@fixture
-def sample2(tmp_path):
-    return sample("sample2.properties", tmp_path)
-
-
-@fixture
-def sample3(tmp_path):
-    return sample("sample3.properties", tmp_path)
 
 
 def assert_capsys(
     capsys,
+    tmp_path: Path,
     stdout_reference: Optional[Union[Path, str]] = None,
     stderr_reference: Optional[Union[Path, str]] = None,
-    format_keywords: Optional[Dict[str, Any]] = None,
 ):
     captured = capsys.readouterr()
-    assert_out(captured.out, stdout_reference, format_keywords=format_keywords)
-    assert_out(captured.err, stderr_reference, format_keywords=format_keywords)
+    assert_out(captured.out, stdout_reference, tmp_path)
+    assert_out(captured.err, stderr_reference, tmp_path)
 
 
 def assert_out(
     content: str,
     reference: Optional[Union[Path, str]],
-    format_keywords: Optional[Dict[str, Any]] = None,
+    tmp_path: Path,
 ):
     if reference is None:
         # no check
@@ -66,19 +62,12 @@ def assert_out(
         assert content == reference
     else:
         assert isinstance(reference, Path)
+        variables = {"tmp_path": tmp_path}
         if getenv(GEN_TEMPLATE) == "1":
             reference.parent.mkdir(exist_ok=True, parents=True)
-            if format_keywords:
-                lines = []
+            with reference.open("w") as ref:
                 for line in content.splitlines():
-                    line2 = line
-                    for key, value in format_keywords.items():
-                        line2 = line2.replace(str(value), "{" + key + "}")
-                    if line != line2:
-                        line = "format:" + line2
-                    lines.append(line + "\n")
-                content = "".join(lines)
-            reference.write_text(content)
+                    ref.write(unformat_line(line, variables) + "\n")
         else:
             assert reference.exists(), f"Init template with {GEN_TEMPLATE}=1"
             content_lines = content.splitlines()
@@ -117,8 +106,7 @@ def assert_out(
                             ref_value in line
                         ), f"{line.encode()} does not contain {ref_value.encode()}"
                     elif ref_action == "format":
-                        assert format_keywords is not None
-                        ref_value = ref_value.format(**format_keywords)
+                        ref_value = format_line(ref_value, variables)
                         assert (
                             line == ref_value
                         ), f"{line.encode()} is not {ref_value.encode()}"

@@ -1,7 +1,7 @@
-format:# Only in {left} (left)
+format:# Only in {tmp_path}/sample1.properties (left)
 [-database.host=localhost-]
-format:# Only in {right} (right)
+format:# Only in {tmp_path}/sample2.properties (right)
 {+database.version=12+}
-format:# Updated from {left} (left) to {right} (right)
+format:# Updated from {tmp_path}/sample1.properties (left) to {tmp_path}/sample2.properties (right)
 database.type=[-postgresql-]{+mysql+}
 database.user=[-test-]{+dbuser+}

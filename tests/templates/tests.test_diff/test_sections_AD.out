@@ -1,6 +1,6 @@
-format:--- {left} (left)    {left_date}
-format:+++ {right} (right)    {right_date}
-format:# Only in {left} (left)
+format:--- {tmp_path}/sample1.properties (left)    2020-12-12 12:00:00
+format:+++ {tmp_path}/sample2.properties (right)    2020-12-12 12:02:00
+format:# Only in {tmp_path}/sample1.properties (left)
 [-database.host=localhost-]
-format:# Only in {right} (right)
+format:# Only in {tmp_path}/sample2.properties (right)
 {+database.version=12+}

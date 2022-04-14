@@ -1,194 +1,226 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,unused-import,redefined-outer-name
 """
 test for diff cli
 """
-
-
+from pathlib import Path
 from shlex import split
 
 import pytest
 from properties_tools.diff import run
-from properties_tools.utils import file_date
 
-from . import *
+from . import TEMPLATES_DIR, assert_capsys, samples
 
 
 def template(filename: str):
     return TEMPLATES_DIR / __name__ / filename
 
 
-def keywords(**files):
-    out = {}
-    for key, value in files.items():
-        out[key] = value
-        out[key + "_date"] = file_date(value)
-    return out
-
-
-def test_missingargs(sample1):
+def test_missingargs(samples: Path):
     with pytest.raises(SystemExit):
-        run(split(f"{sample1}"))
+        run(split(f"{samples / 'sample1.properties'}"))
 
 
-def test_bad_sep(capsys, sample1):
+def test_bad_sep(capsys, samples: Path):
     with pytest.raises(SystemExit):
-        run(split(f"{sample1} {sample1} --sep /"))
+        run(
+            split(
+                f"{samples / 'sample1.properties'} {samples / 'sample1.properties'} --sep /"
+            )
+        )
     assert_capsys(
         capsys,
+        samples,
         stdout_reference="",
         stderr_reference=template("test_bad_sep.err"),
-        format_keywords=keywords(left=sample1),
     )
 
 
-def test_samefile(capsys, sample1):
-    run(split(f"{sample1} {sample1}"))
+def test_samefile(capsys, samples: Path):
+    run(split(f"{samples / 'sample1.properties'} {samples / 'sample1.properties'}"))
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_samefile.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1),
     )
 
 
-def test_altfile(capsys, sample1, sample1_alt):
-    run(split(f"{sample1} {sample1_alt}"))
+def test_altfile(capsys, samples: Path):
+    run(split(f"{samples / 'sample1.properties'} {samples / 'sample1_alt.properties'}"))
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_altfile.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample1_alt),
     )
 
 
-def test_simple(capsys, sample1, sample2):
-    run(split(f"{sample1} {sample2} --mode simple"))
+def test_simple(capsys, samples: Path):
+    run(
+        split(
+            f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} --mode simple"
+        )
+    )
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_simple.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
 
 
-def test_diff(capsys, sample1, sample2):
-    run(split(f"{sample1} {sample2} --mode diff"))
+def test_diff(capsys, samples: Path):
+    run(
+        split(
+            f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} --mode diff"
+        )
+    )
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_diff.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
 
 
-def test_wdiff(capsys, sample1, sample2):
-    run(split(f"{sample1} {sample2} --mode wdiff"))
+def test_wdiff(capsys, samples: Path):
+    run(
+        split(
+            f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} --mode wdiff"
+        )
+    )
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_wdiff.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
 
 
-def test_quiet(capsys, sample1, sample2):
-    run(split(f"{sample1} {sample2} --quiet"))
+def test_quiet(capsys, samples: Path):
+    run(
+        split(
+            f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} --quiet"
+        )
+    )
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_quiet.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
 
 
-def test_quote(capsys, sample1, sample2):
-    run(split(f"{sample1} {sample2} -m diff"))
+def test_quote(capsys, samples: Path):
+    run(
+        split(
+            f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} -m diff"
+        )
+    )
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_quote_noquote.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
-    run(split(f"{sample1} {sample2}  -m diff --quote"))
+    run(
+        split(
+            f"{samples / 'sample1.properties'} {samples / 'sample2.properties'}  -m diff --quote"
+        )
+    )
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_quote_withquote.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
 
 
-def test_sections(capsys, sample1, sample2):
-    run(split(f"{sample1} {sample2} -A"))
+def test_sections(capsys, samples: Path):
+    run(split(f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} -A"))
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_sections_A.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
-    run(split(f"{sample1} {sample2} -D"))
+    run(split(f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} -D"))
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_sections_D.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
-    run(split(f"{sample1} {sample2} -U"))
+    run(split(f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} -U"))
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_sections_U.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
-    run(split(f"{sample1} {sample2} -AD"))
+    run(split(f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} -AD"))
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_sections_AD.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
-    run(split(f"{sample1} {sample2} -AU"))
+    run(split(f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} -AU"))
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_sections_AU.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
-    run(split(f"{sample1} {sample2} -DU"))
+    run(split(f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} -DU"))
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_sections_DU.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
-    run(split(f"{sample1} {sample2} -ADU"))
+    run(
+        split(f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} -ADU")
+    )
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_sections_ADU.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
 
 
-def test_colors(capsys, sample1, sample2):
-    run(split(f"{sample1} {sample2} --mode simple --color"))
+def test_colors(capsys, samples: Path):
+    run(
+        split(
+            f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} --mode simple --color"
+        )
+    )
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_colors_simple.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
-    run(split(f"{sample1} {sample2} --mode wdiff --color"))
+    run(
+        split(
+            f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} --mode wdiff --color"
+        )
+    )
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_colors_wdiff.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
-    run(split(f"{sample1} {sample2} --mode diff --color"))
+    run(
+        split(
+            f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} --mode diff --color"
+        )
+    )
     assert_capsys(
         capsys,
+        samples,
         stdout_reference=template("test_colors_diff.out"),
         stderr_reference="",
-        format_keywords=keywords(left=sample1, right=sample2),
     )
