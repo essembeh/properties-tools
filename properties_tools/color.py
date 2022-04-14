@@ -1,3 +1,4 @@
+# pylint: disable=missing-function-docstring,missing-module-docstring
 import sys
 from dataclasses import dataclass
 from typing import Any, Optional
@@ -7,6 +8,10 @@ from colorama import Fore, Style
 
 @dataclass
 class Color:
+    """
+    Easy way to print optionally colored messages
+    """
+
     enabled: bool
 
     def __post_init__(self):

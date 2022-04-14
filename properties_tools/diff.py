@@ -194,7 +194,7 @@ def run(argv: Optional[List[str]] = None):
                             color.green(f"{{+{quote(right, key)}+}}"),
                             sep="",
                         )
-    except BaseException as exc:
+    except BaseException as exc:  # pylint: disable=broad-except
         print(color.red(f"ERROR: {exc}"), file=sys.stderr)
         if isinstance(exc, SyntaxError):
             print(

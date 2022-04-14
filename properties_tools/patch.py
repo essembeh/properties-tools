@@ -35,6 +35,7 @@ def run(argv: Optional[List[str]] = None):
         help="disable colors",
     )
     parser.add_argument(
+        "-c",
         "--comments",
         dest="comments",
         action="store_true",
@@ -221,7 +222,7 @@ def run(argv: Optional[List[str]] = None):
                 "\n".join(output_content) + "\n"
             )
 
-    except BaseException as exc:
+    except BaseException as exc:  # pylint: disable=broad-except
         print(color.red(f"ERROR: {exc}"), file=sys.stderr)
         if isinstance(exc, SyntaxError):
             print(
