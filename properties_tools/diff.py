@@ -48,12 +48,34 @@ def run(argv: Optional[List[str]] = None):
         default="=",
         help="key/value separator, default is '='",
     )
-    parser.add_argument(
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument(
         "-m",
         "--mode",
         choices=["simple", "diff", "wdiff"],
         default="wdiff",
         help="select a format to show differences: using colors only (simple), using diff-like format (diff) or wdiff-like (wdiff) format. Default is 'wdiff'",
+    )
+    mode_group.add_argument(
+        "--diff",
+        action="store_const",
+        dest="mode",
+        const="diff",
+        help="use diff-like format to show differences",
+    )
+    mode_group.add_argument(
+        "--wdiff",
+        action="store_const",
+        dest="mode",
+        const="wdiff",
+        help="use wdiff-like format to show differences",
+    )
+    mode_group.add_argument(
+        "--simple",
+        action="store_const",
+        dest="mode",
+        const="simple",
+        help="use simple format to show differences",
     )
     parser.add_argument(
         "-A",

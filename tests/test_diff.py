@@ -67,6 +67,17 @@ def test_simple(capsys, samples: Path):
         stdout_reference=template("test_simple.out"),
         stderr_reference="",
     )
+    run(
+        split(
+            f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} --simple"
+        )
+    )
+    assert_capsys(
+        capsys,
+        samples,
+        stdout_reference=template("test_simple.out"),
+        stderr_reference="",
+    )
 
 
 def test_diff(capsys, samples: Path):
@@ -81,12 +92,34 @@ def test_diff(capsys, samples: Path):
         stdout_reference=template("test_diff.out"),
         stderr_reference="",
     )
+    run(
+        split(
+            f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} --diff"
+        )
+    )
+    assert_capsys(
+        capsys,
+        samples,
+        stdout_reference=template("test_diff.out"),
+        stderr_reference="",
+    )
 
 
 def test_wdiff(capsys, samples: Path):
     run(
         split(
             f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} --mode wdiff"
+        )
+    )
+    assert_capsys(
+        capsys,
+        samples,
+        stdout_reference=template("test_wdiff.out"),
+        stderr_reference="",
+    )
+    run(
+        split(
+            f"{samples / 'sample1.properties'} {samples / 'sample2.properties'} --wdiff"
         )
     )
     assert_capsys(
