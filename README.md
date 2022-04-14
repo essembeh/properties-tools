@@ -38,7 +38,7 @@ $ properties-diff --help
 
 ```sh
 $ properties-diff --help
-usage: properties-diff [-h] [-q] [--quote] [--sep SEP] [-m {simple,diff,wdiff}] [-A] [-D] [-U] left.properties right.properties
+usage: properties-diff [-h] [-q] [--quote] [--color | --nocolor] [--sep SEP] [-m {simple,diff,wdiff} | --diff | --wdiff | --simple] [-A] [-D] [-U] left.properties right.properties
 
 positional arguments:
   left.properties       left file to compare
@@ -48,9 +48,14 @@ optional arguments:
   -h, --help            show this help message and exit
   -q, --quiet           print less information
   --quote               use double quotes for values, example: foo="bar"
+  --color               force colors
+  --nocolor             disable colors
   --sep SEP             key/value separator, default is '='
   -m {simple,diff,wdiff}, --mode {simple,diff,wdiff}
                         select a format to show differences: using colors only (simple), using diff-like format (diff) or wdiff-like (wdiff) format. Default is 'wdiff'
+  --diff                use diff-like format to show differences
+  --wdiff               use wdiff-like format to show differences
+  --simple              use simple format to show differences
   -A, --added           print added properties
   -D, --deleted         print deleted properties
   -U, --updated         print updated properties
@@ -75,7 +80,7 @@ database.user=[-test-]{+dbuser+}
 
 Comparing *properties* files like `diff`
 ```sh
-$ properties-diff tests/sample1.properties tests/sample2.properties --mode diff
+$ properties-diff tests/sample1.properties tests/sample2.properties --diff
 --- tests/sample1.properties (left)    2022-04-07 12:48:44
 +++ tests/sample2.properties (right)    2022-04-07 12:49:02
 # Only in tests/sample1.properties (left)
@@ -123,16 +128,16 @@ You can see *differences* between the *properties* files using 3 modes using `--
 
 ```sh
 $ properties-patch --help
-usage: properties-patch [-h] [-c] [--comments] [-f] [-i] [--quote] [--sep SEP] [-A] [-D] [-U] -p patch.properties [-o output.properties] source.properties
+usage: properties-patch [-h] [--color | --nocolor] [-c] [-i] [--quote] [--sep SEP] [-A] [-D] [-U] -p patch.properties [-o output.properties | -w] [-f] source.properties
 
 positional arguments:
   source.properties     file to modify
 
 optional arguments:
   -h, --help            show this help message and exit
-  -c, --color           print colors
-  --comments            insert comment when property is added, updated or deleted
-  -f, --force           force output file (--output) overwrite if it already exists
+  --color               force colors
+  --nocolor             disable colors
+  -c, --comments        insert comment when property is added, updated or deleted
   -i, --interactive     ask for confirmation to add, update or delete a property
   --quote               use double quotes for values, example: foo="bar"
   --sep SEP             key/value separator, default is '='
@@ -140,6 +145,8 @@ optional arguments:
                         patch file
   -o output.properties, --output output.properties
                         modified file
+  -w, --overwrite       update input properties file in place
+  -f, --force           force output file (--output) overwrite if it already exists
 
   -A, --add             add new properties from patches
   -D, --delete          delete properties not in patches
