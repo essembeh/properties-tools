@@ -1,7 +1,7 @@
 ![Github](https://img.shields.io/github/tag/essembeh/properties-diff.svg)
 ![PyPi](https://img.shields.io/pypi/v/properties-tools.svg)
 ![Python](https://img.shields.io/pypi/pyversions/properties-tools.svg)
-![](https://github.com/essembeh/properties-tools/actions/workflows/poetry.yml/badge.svg)
+![CI](https://github.com/essembeh/properties-tools/actions/workflows/poetry.yml/badge.svg)
 
 
 # properties-tools
@@ -26,7 +26,8 @@ $ properties-diff --help
 
 Install from the sources
 ```sh
-$ pip3 install --user --upgrade git+https://github.com/essembeh/properties-tools
+$ pip3 install poetry
+$ pip3 install git+https://github.com/essembeh/properties-tools
 $ properties-diff --help
 ```
 
@@ -37,8 +38,8 @@ $ properties-diff --help
 ## Usage
 
 ```sh
-$ properties-diff --help
-usage: properties-diff [-h] [-q] [--quote] [--color | --nocolor] [--sep SEP] [-m {simple,diff,wdiff} | --diff | --wdiff | --simple] [-A] [-D] [-U] left.properties right.properties
+$ properties-diff --help 
+usage: properties-diff [-h] [--version] [-q] [--quote] [--color | --nocolor] [--sep SEP] [-m {simple,diff,wdiff} | --diff | --wdiff | --simple] [-A] [-D] [-U] left.properties right.properties
 
 positional arguments:
   left.properties       left file to compare
@@ -46,6 +47,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  --version             show program's version number and exit
   -q, --quiet           print less information
   --quote               use double quotes for values, example: foo="bar"
   --color               force colors
@@ -127,14 +129,15 @@ You can see *differences* between the *properties* files using 3 modes using `--
 ## Usage
 
 ```sh
-$ properties-patch --help
-usage: properties-patch [-h] [--color | --nocolor] [-c] [-i] [--quote] [--sep SEP] [-A] [-D] [-U] -p patch.properties [-o output.properties | -w] [-f] source.properties
+$ properties-patch --help                                                                       
+usage: properties-patch [-h] [--version] [--color | --nocolor] [-c] [-i] [--quote] [--sep SEP] [-A] [-D] [-U] -p patch.properties [-o output.properties | -w] [-f] source.properties
 
 positional arguments:
   source.properties     file to modify
 
 optional arguments:
   -h, --help            show this help message and exit
+  --version             show program's version number and exit
   --color               force colors
   --nocolor             disable colors
   -c, --comments        insert comment when property is added, updated or deleted
