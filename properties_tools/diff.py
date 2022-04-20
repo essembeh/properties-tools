@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import List, Optional
 
+from . import __version__
 from .color import Color
 from .utils import file_date, propertiesfile_to_dict
 
@@ -16,6 +17,9 @@ def run(argv: Optional[List[str]] = None):
     diff cli
     """
     parser = ArgumentParser()
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
+    )
     parser.add_argument(
         "-q",
         "--quiet",

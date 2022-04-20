@@ -10,6 +10,7 @@ from typing import Any, Callable, List, Optional
 
 from colorama.ansi import Cursor, clear_line
 
+from . import __version__
 from .color import Color
 from .utils import parse_file, propertiesfile_to_dict
 
@@ -19,6 +20,9 @@ def run(argv: Optional[List[str]] = None):
     patch cli
     """
     parser = ArgumentParser()
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
+    )
     color_group = parser.add_mutually_exclusive_group()
     color_group.add_argument(
         "--color",

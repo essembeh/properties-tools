@@ -6,6 +6,7 @@ from pathlib import Path
 from shlex import split
 
 import pytest
+from properties_tools import __version__
 from properties_tools.diff import run
 
 from . import TEMPLATES_DIR, assert_capsys, samples
@@ -13,6 +14,12 @@ from . import TEMPLATES_DIR, assert_capsys, samples
 
 def template(filename: str):
     return TEMPLATES_DIR / __name__ / filename
+
+
+def test_version(capsys):
+    with pytest.raises(SystemExit):
+        run(split("--version"))
+    assert __version__ in capsys.readouterr().out
 
 
 def test_missingargs(samples: Path):
