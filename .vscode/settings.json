@@ -2,6 +2,7 @@
     "files.exclude": {
         ".venv/": true,
         "**/__pycache__/": true,
+        ".pytest_cache/": true,
     },
     "[python]": {
         "editor.formatOnSave": true,
@@ -10,8 +11,6 @@
         },
     },
     "python.pythonPath": ".venv/bin/python",
-    // use this interpreter if you installed vscodium from flatpak
-    //"python.pythonPath": "extra/flatpak-python.sh",
     "python.formatting.provider": "black",
     "python.linting.pylintEnabled": true,
 }
